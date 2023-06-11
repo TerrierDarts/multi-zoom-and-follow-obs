@@ -123,7 +123,7 @@ def follow_toggle(pressed):
         
         newX = round_up(mouseX -(curX/2))
         newY = round_up(mouseY -(curY/2))
-        log(f"NewMouseX{mouseX}/{newX} NewMouseY{mouseY}/{newY}")
+        log(f"NewMouseX{mouseX} / {mouse.x} / {newX} NewMouseY {mouseY} / {mouse.y} / {newY}")
 
         obs.obs_data_set_int(crop_settings, "top", newY)
         obs.obs_data_set_int(crop_settings, "left", newX)
