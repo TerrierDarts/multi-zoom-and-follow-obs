@@ -127,17 +127,25 @@ def increase_zoom(cx, cy, nx, ny):
     while cx != nx or cy != ny:
         if cx > nx:
             cx -= 10
+            if cx < nx:
+                cx = nx
         elif cx < nx:
             cx += 10
+            if cx > nx:
+                cx = nx
 
-        if cy > ny :
-            cy -= 10
+        if cy > ny:
+            cy -= 6
+            if cy < ny:
+                cy = ny
         elif cy < ny:
-            cy += 10
+            cy += 6
+            if cy > ny:
+                cy = ny
         obs_set_crop_settings(cx,cy)
-        print(f"Current X: {cx} Current Y: {cy}")
+        #print(f"Current X: {cx} Current Y: {cy}")
 
-        time.sleep(0.005)  # 10ms delay
+        time.sleep(0.008)  # 10ms delay
     log("Zoom Down")
 
 
