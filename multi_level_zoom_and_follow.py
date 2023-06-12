@@ -67,59 +67,81 @@ def log(message):
     print("[LOG INFO] " + str(message))
 
 def zoom_off(pressed):
-     if pressed:
-        obs_set_crop_settings(1920,1080, 1)
+    if pressed:
+        curX = get_width()
+        curY = get_height()
+        increase_zoom(curX,curY,1920,1080)
 
 def zoom_two(pressed):
-     if pressed:
-      log("zoom2")
-      obs_set_crop_settings(960,540, 1)
+    if pressed:
+        curX = get_width()
+        curY = get_height()
+        log(f"zoom2 {curX} {curY}")
+        increase_zoom(curX,curY,960,540)
 
 def zoom_four(pressed):
     if pressed:
-       obs_set_crop_settings(480,270, 1)
+        curX = get_width()
+        curY = get_height()
+        increase_zoom(curX,curY,480,270)
 
 def get_selected_source():
     #source_name = obs.obs_data_get_string(obs.obs_frontend_get_current_scene())
     #source = obs.obs_get_source_by_name(source_name)
     return "Monitor View"
 
-def obs_set_crop_settings(width,height, duration):
+def obs_set_crop_settings(width,height):
     source = obs.obs_get_source_by_name(get_selected_source())
     crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
     crop_settings = obs.obs_source_get_settings(crop)
     log(obs.obs_data_get_json(crop_settings))
-    curX = obs.obs_data_get_int(crop_settings,"cx")
-    curY = obs.obs_data_get_int(crop_settings,"cy")
+    obs.obs_data_set_int(crop_settings, "cx", width)
+    obs.obs_data_set_int(crop_settings, "cy", height)
+    obs.obs_data_set_int(crop_settings, "top", 0)
+    obs.obs_data_set_int(crop_settings, "left", 0)
+    obs.obs_data_set_bool(crop_settings, "relative", False)
+    obs.obs_source_update(crop, crop_settings)
+      
+   
+
+
+def get_height():
+    source = obs.obs_get_source_by_name(get_selected_source())
+    crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
+    crop_settings = obs.obs_source_get_settings(crop)
+    log(obs.obs_data_get_json(crop_settings))
+    curY = obs.obs_data_get_int(crop_settings, "cy")
+    return curY
+
     
-    
-    start_time = time.time()
+def get_width():
+    source = obs.obs_get_source_by_name(get_selected_source())
+    crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
+    crop_settings = obs.obs_source_get_settings(crop)
+    log(obs.obs_data_get_json(crop_settings))
+    curX = obs.obs_data_get_int(crop_settings, "cx")
+    return curX
 
-    while True:
-        elapsed_time = time.time() - start_time
 
-        # Calculate the position based on the elapsed time and duration
-        position = min(elapsed_time / duration, 1.0)
-        newX = curX + (width - curX) * position
-        newY = curY + (height - curY) * position
+def increase_zoom(cx, cy, nx, ny):
+    while cx != nx or cy != ny:
+        if cx > nx:
+            cx -= 10
+        elif cx < nx:
+            cx += 10
 
-        # Perform actions with newX and newY
-        log(f"Current X: {newX}/{width} Current Y: {newY}/{height}")
+        if cy > ny :
+            cy -= 10
+        elif cy < ny:
+            cy += 10
+        obs_set_crop_settings(cx,cy)
+        print(f"Current X: {cx} Current Y: {cy}")
 
-        obs.obs_data_set_int(crop_settings, "cx", round(newX))
-        obs.obs_data_set_int(crop_settings, "cy", round(newY))
-        obs.obs_data_set_int(crop_settings, "top", 0)
-        obs.obs_data_set_int(crop_settings, "left", 0)
-        obs.obs_data_set_bool(crop_settings, "relative", False)
-    
-        obs.obs_source_update(crop, crop_settings)
-        
-        if elapsed_time >= duration:
-            break
+        time.sleep(0.005)  # 10ms delay
+    log("Zoom Down")
 
-        time.sleep(0.01)  # Small delay to control the update rate
-    log("zoom finished")
 
+   
 def follow_toggle(pressed):
     if pressed:
         mouse = pwc.getMousePos()
