@@ -8,6 +8,8 @@ description = (
     "ZOOM AND FOLLOW"
    
 )
+source = ""
+
 
 def populate_list_property_with_source_names(list_property):
     """
@@ -40,7 +42,10 @@ def script_properties():
     return props
 
 def script_update(settings):
-    populate_list_property_with_source_names((obs.obs_properties_get(settings)))
+    #populate_list_property_with_source_names((obs.obs_properties_get(settings)))
+    global source
+    source = obs.obs_data_get_string(settings, "source")
+    log(source)
 
 def script_description():
     return description
@@ -85,20 +90,21 @@ def zoom_four(pressed):
         curY = get_height()
         increase_zoom(curX,curY,480,270)
 
+
 def get_selected_source():
-    #source_name = obs.obs_data_get_string(obs.obs_frontend_get_current_scene())
-    #source = obs.obs_get_source_by_name(source_name)
-    return "Monitor View"
+    
+    global source
+    text = source.split('||')
+    sourceName = text[0]
+    return sourceName
 
 def obs_set_crop_settings(width,height):
-    source = obs.obs_get_source_by_name(get_selected_source())
-    crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
+    sourceN = obs.obs_get_source_by_name(get_selected_source())
+    crop = obs.obs_source_get_filter_by_name(sourceN, "MultiZoom")
     crop_settings = obs.obs_source_get_settings(crop)
     log(obs.obs_data_get_json(crop_settings))
     obs.obs_data_set_int(crop_settings, "cx", width)
     obs.obs_data_set_int(crop_settings, "cy", height)
-    obs.obs_data_set_int(crop_settings, "top", 0)
-    obs.obs_data_set_int(crop_settings, "left", 0)
     obs.obs_data_set_bool(crop_settings, "relative", False)
     obs.obs_source_update(crop, crop_settings)
       
@@ -106,8 +112,8 @@ def obs_set_crop_settings(width,height):
 
 
 def get_height():
-    source = obs.obs_get_source_by_name(get_selected_source())
-    crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
+    sourceN = obs.obs_get_source_by_name(get_selected_source())
+    crop = obs.obs_source_get_filter_by_name(sourceN, "MultiZoom")
     crop_settings = obs.obs_source_get_settings(crop)
     log(obs.obs_data_get_json(crop_settings))
     curY = obs.obs_data_get_int(crop_settings, "cy")
@@ -115,8 +121,8 @@ def get_height():
 
     
 def get_width():
-    source = obs.obs_get_source_by_name(get_selected_source())
-    crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
+    sourceN = obs.obs_get_source_by_name(get_selected_source())
+    crop = obs.obs_source_get_filter_by_name(sourceN, "MultiZoom")
     crop_settings = obs.obs_source_get_settings(crop)
     log(obs.obs_data_get_json(crop_settings))
     curX = obs.obs_data_get_int(crop_settings, "cx")
@@ -143,9 +149,9 @@ def increase_zoom(cx, cy, nx, ny):
             if cy > ny:
                 cy = ny
         obs_set_crop_settings(cx,cy)
-        #print(f"Current X: {cx} Current Y: {cy}")
+        
 
-        time.sleep(0.008)  # 10ms delay
+        time.sleep(0.01)
     log("Zoom Down")
 
 
@@ -158,8 +164,11 @@ def follow_toggle(pressed):
         # Workout level of Zoom
         # adjust level of tracking
         # reset the settings
-        source = obs.obs_get_source_by_name(get_selected_source())
-        crop = obs.obs_source_get_filter_by_name(source, "MultiZoom")
+        sourceName = get_selected_source()
+        #sourceName = obs.obs_get_source_by_name(get_selected_source())
+       
+        
+        crop = obs.obs_source_get_filter_by_name(sourceName, "MultiZoom")
         crop_settings = obs.obs_source_get_settings(crop)
         log(obs.obs_data_get_json(crop_settings))
     
@@ -182,8 +191,9 @@ def follow_toggle(pressed):
         obs.obs_source_update(crop,crop_settings)
         
         obs.obs_data_release(crop_settings)
-        obs.obs_source_release(source)
+        obs.obs_source_release(sourceName)
         obs.obs_source_release(crop)
+        
 
 def round_up(n):
    

@@ -12,7 +12,7 @@ Once added to OBS and you will need to add a `Crop/Pad` Filter to the source you
 - Auto Turn off follow when zoom is turned off
 - Turn on Follow if going from Off to On
 - Make sure the when going from 2 > 4 or 4 > 2 if follow is off it zoooms correctly 
-- Add Smoothness to zoom
+
 
 ## OBSRaw Hotkeys (WEBSOCKET 5)
 
