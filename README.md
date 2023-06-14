@@ -46,6 +46,17 @@ Problems with the Follow
 }
 ```
 
+### Zoom 4x
+
+```json
+{
+  "requestType": "TriggerHotkeyByName",
+  "requestData": {
+    "hotkeyName": "zoom_four"
+  }
+}
+```
+
 ### Follow Toggle
 
 ```json
