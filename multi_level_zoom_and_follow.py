@@ -11,6 +11,7 @@ source = ""
 cWidth = ""
 cHeight = ""
 follow_on = False
+seconds = 0.1
 
 
 def populate_list_property_with_source_names(list_property):
@@ -87,6 +88,7 @@ def zoom_off(pressed):
         global cWidth
         global cHeight
         increase_zoom(curX, curY, cWidth, cHeight)
+        set_x_and_y(0,0)
 
 
 def zoom_two(pressed):
@@ -171,12 +173,25 @@ def increase_zoom(cx, cy, nx, ny):
    
 def follow_toggle(pressed):
     if pressed:
+        mouse = pwc.getMousePos()
+        log(f"PosMouseX/{mouse.x} PosMouseY{mouse.y}")
         global follow_on
         if follow_on is True:
             follow_on = False
         else:
             follow_on = True
-    log(follow_on)
+        log(follow_on)
+
+def set_x_and_y(x,y):
+    sourceName = obs.obs_get_source_by_name(get_selected_source())
+    crop = obs.obs_source_get_filter_by_name(sourceName, "MultiZoom")
+    crop_settings = obs.obs_source_get_settings(crop)
+    #log(obs.obs_data_get_json(crop_settings))
+    obs.obs_data_set_int(crop_settings, "top", y)
+    obs.obs_data_set_int(crop_settings, "left", x)
+    obs.obs_data_set_bool(crop_settings, "relative", False)
+    obs.obs_source_update(crop, crop_settings) 
+    
 
 
 def script_tick(seconds):
@@ -184,30 +199,27 @@ def script_tick(seconds):
     if follow_on is True: 
         # Get mouse Pos          
         mouse = pwc.getMousePos()
-        log(f"PosMouseX/{mouse.x} PosMouseY{mouse.y}")
+        curX = get_width()
+        curY = get_height()
+        global cWidth
+        global cHeight
+        cx = mouse.x - curX if mouse.x > curX else mouse.x
+        cy = mouse.y - curY if mouse.y > curY else mouse.y
+       
+        x = 0 if mouse.x < (curX/2) else cx + (curX/2) 
+        x = cHeight if mouse.x > cWidth  else cx + (curX/2)
+        
+        y = 0 if mouse.y < (curY/2) else cy + (curY/2) 
+        y = cHeight if mouse.y > cHeight  else cy + (curY/2)
+
+        
+        set_x_and_y(round_up(x),round_up(y))
+        log(f"PosMouseX/{x} PosMouseY{y}")
         
         # Workout level of Zoom
         # adjust level of tracking
         # reset the settings
-        sourceName = get_selected_source()
-        crop = obs.obs_source_get_filter_by_name(sourceName, "MultiZoom")
-        crop_settings = obs.obs_source_get_settings(crop)
-        log(obs.obs_data_get_json(crop_settings))
-        curX = obs.obs_data_get_int(crop_settings, "cx")
-        curY = obs.obs_data_get_int(crop_settings, "cy")
-        log(f"MouseX{curX} MouseY{curY}")
-        mouseX = 1920 if mouse.x > 1920 else mouse.x
-        mouseY = 1080 if mouse.x > 1080 else mouse.x      
-        newX = round_up(mouseX - (curX / 2))
-        newY = round_up(mouseY - (curY / 2))
-        log(f"NewMouseX{mouseX}/ {newX} NewMouseY {mouseY}/{newY}")
-        obs.obs_data_set_int(crop_settings, "top", newY)
-        obs.obs_data_set_int(crop_settings, "left", newX)
-        obs.obs_data_set_bool(crop_settings, "relative", False)
-        obs.obs_source_update(crop, crop_settings) 
-        obs.obs_data_release(crop_settings)
-        obs.obs_source_release(sourceName)
-        obs.obs_source_release(crop)
+        
             
 
 def round_up(n):

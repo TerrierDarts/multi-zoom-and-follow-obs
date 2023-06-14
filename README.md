@@ -1,5 +1,7 @@
 # Multi Level Zoom and Follow 
 
+This script is heavily influenced by https://github.com/tryptech/obs-zoom-and-follow this scripts works great I just wanted a tiny bit more
+
 Script for OBS and Multi Level Zooms and Mouse Follow
 Setting this up requires pywict1
 
